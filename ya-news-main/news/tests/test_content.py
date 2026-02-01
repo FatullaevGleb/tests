@@ -27,7 +27,7 @@ class TestHomePage(TestCase):
             )
             for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
         ]
-        News.objects.bulk_create(all_news) 
+        News.objects.bulk_create(all_news)
 
     def test_news_count(self):
         response = self.client.get(self.HOME_URL)
