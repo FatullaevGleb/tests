@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.test.client import Client
 from django.utils import timezone
 
 from news.models import Comment, News
@@ -21,7 +22,6 @@ def reader(django_user_model):
 
 @pytest.fixture
 def author_client(author):
-    from django.test.client import Client
     client = Client()
     client.force_login(author)
     return client
@@ -29,7 +29,6 @@ def author_client(author):
 
 @pytest.fixture
 def reader_client(reader):
-    from django.test.client import Client
     client = Client()
     client.force_login(reader)
     return client
@@ -50,16 +49,6 @@ def comment(author, news):
         author=author,
         text='Текст комментария'
     )
-
-
-@pytest.fixture
-def comment_id_for_args(comment):
-    return (comment.id,)
-
-
-@pytest.fixture
-def news_id_for_args(news):
-    return (news.id,)
 
 
 @pytest.fixture

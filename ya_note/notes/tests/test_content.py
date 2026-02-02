@@ -1,21 +1,18 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 
 from notes.forms import NoteForm
 from notes.models import Note
 
-User = get_user_model()
+from .common import BaseTestCase
 
 
-class TestListPage(TestCase):
+class TestListPage(BaseTestCase):
 
     LIST_URL = reverse('notes:list')
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Автор')
-        cls.reader = User.objects.create(username='Читатель')
+        super().setUpTestData()
         cls.note = Note.objects.create(
             title='Заголовок автора',
             text='Текст заметки автора',
@@ -30,27 +27,29 @@ class TestListPage(TestCase):
         )
 
     def test_notes_list_for_author(self):
-        """В списке заметок автора есть только его заметки."""
         self.client.force_login(self.author)
+
         response = self.client.get(self.LIST_URL)
+
         object_list = response.context['object_list']
         self.assertIn(self.note, object_list)
         self.assertEqual(object_list.count(), 1)
 
     def test_notes_list_for_reader(self):
-        """В списке заметок читателя есть только его заметки."""
         self.client.force_login(self.reader)
+
         response = self.client.get(self.LIST_URL)
+
         object_list = response.context['object_list']
         self.assertNotIn(self.note, object_list)
         self.assertEqual(object_list.count(), 1)
 
 
-class TestDetailPage(TestCase):
+class TestDetailPage(BaseTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Автор')
+        super().setUpTestData()
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Текст заметки',
@@ -59,19 +58,20 @@ class TestDetailPage(TestCase):
         )
 
     def test_note_in_list_for_author(self):
-        """Отдельная заметка передаётся в список заметок автора."""
         self.client.force_login(self.author)
+
         url = reverse('notes:list')
         response = self.client.get(url)
+
         object_list = response.context['object_list']
         self.assertIn(self.note, object_list)
 
 
-class TestFormPages(TestCase):
+class TestFormPages(BaseTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Автор')
+        super().setUpTestData()
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Текст заметки',
@@ -80,17 +80,19 @@ class TestFormPages(TestCase):
         )
 
     def test_add_page_contains_form(self):
-        """На страницу добавления заметки передаётся форма."""
         self.client.force_login(self.author)
+
         url = reverse('notes:add')
         response = self.client.get(url)
+
         self.assertIn('form', response.context)
         self.assertIsInstance(response.context['form'], NoteForm)
 
     def test_edit_page_contains_form(self):
-        """На страницу редактирования заметки передаётся форма."""
         self.client.force_login(self.author)
+
         url = reverse('notes:edit', args=(self.note.slug,))
         response = self.client.get(url)
+
         self.assertIn('form', response.context)
         self.assertIsInstance(response.context['form'], NoteForm)
